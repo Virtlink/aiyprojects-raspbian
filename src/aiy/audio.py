@@ -97,17 +97,21 @@ def record_to_wave(filepath, duration):
             time.sleep(0.1)
 
 
-def play_wave(wave_file):
+def play_wave(wave_file, volume=50):
     """Plays the given wave file.
 
     The wave file has to be mono and small enough to be loaded in memory.
     """
-    player = get_player()
-    player.play_wav(wave_file)
+    with wave.open(wave_file, 'r') as wav:
+        if wav.getnchannels() != 1:
+            raise ValueError(wave_file + ' is not a mono file')
+        frames = wav.readframes(wav.getnframes())
+        play_audio(frames, volume, wav.getsampwidth(), wav.getframerate())
 
 
-def play_audio(audio_data, volume=50):
+def play_audio(audio_data, volume=50, swidth=AUDIO_SAMPLE_SIZE, srate=AUDIO_SAMPLE_RATE_HZ):
     """Plays the given audio data."""
+
     player = get_player()
 
     db_range = -60.0 - (-60.0 * (volume / 100.0))
@@ -116,8 +120,10 @@ def play_audio(audio_data, volume=50):
     adjusted_audio_data = np.multiply(np.frombuffer(
         audio_data, dtype=np.int16), db_scaler).astype(np.int16).tobytes()
 
-    player.play_bytes(adjusted_audio_data, sample_width=AUDIO_SAMPLE_SIZE,
-                      sample_rate=AUDIO_SAMPLE_RATE_HZ)
+    player.play_bytes(adjusted_audio_data, sample_width=swidth,
+                      sample_rate=srate)
+
+
 
 
 def say(words, lang=None, volume=None, pitch=None):

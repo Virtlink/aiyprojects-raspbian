@@ -73,7 +73,7 @@ def _credentials_flow_interactive(client_secrets_path):
         # default but that seems to cause issues:
         # https://github.com/google/aiyprojects-raspbian/issues/269
         webbrowser.register('chromium-browser', None, webbrowser.Chrome('chromium-browser'), -1)
-        credentials = flow.run_local_server()
+        credentials = flow.run_local_server(port=8081)
     else:
         credentials = flow.run_console()
     return credentials
